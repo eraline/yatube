@@ -9,7 +9,7 @@ from django.urls import reverse
 from django import forms
 from django.core.cache import cache
 
-from posts.models import Post, Group, Comment, User
+from posts.models import Post, Group, Comment, User, Follow
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 # User = get_user_model()
@@ -82,7 +82,7 @@ class PostsPagesTests(TestCase):
 
     def test_pages_uses_correct_template(self):
         '''URL-адрес использует соответствующий шаблон.'''
-        post_id = PostsPagesTests.post.pk
+        post_id = self.post.pk
         template_pages_names = {
             reverse('posts:index'): 'posts/index.html',
             reverse('posts:group_list', kwargs={'slug': 'test_slug'}):
@@ -137,15 +137,15 @@ class PostsPagesTests(TestCase):
 
     def test_post_detail_shows_correct_context(self):
         '''Проверяем, что передается верный контекст на страницу поста'''
-        post_count = PostsPagesTests.user.posts.all().count()
+        post_count = self.user.posts.all().count()
         test_comment = Comment.objects.create(
             text='Test comment',
-            post=PostsPagesTests.post,
-            author=PostsPagesTests.second_user
+            post=self.post,
+            author=self.second_user
         )
         response = self.authorized_client.get(
             reverse('posts:post_detail',
-                    kwargs={'post_id': PostsPagesTests.post_id})
+                    kwargs={'post_id': self.post_id})
         )
         # Проверяем, что это пост
         self.assertIsInstance(response.context['post'], Post)
@@ -159,7 +159,7 @@ class PostsPagesTests(TestCase):
         '''Верная ли форма в контексте на странице edit post'''
         response = self.authorized_client.get(
             reverse('posts:post_edit',
-                    kwargs={'post_id': PostsPagesTests.post_id})
+                    kwargs={'post_id': self.post_id})
         )
         form_fields = {
             'text': forms.fields.CharField,
@@ -172,7 +172,7 @@ class PostsPagesTests(TestCase):
 
         self.assertTrue(response.context['is_edit'])
         self.assertEqual(response.context['post_id'],
-                         PostsPagesTests.post_id)
+                         self.post_id)
 
     def test_create_post_shows_correct_context(self):
         '''Проверяем типы полей у формы при создани поста'''
@@ -221,8 +221,8 @@ class PostsPagesTests(TestCase):
         '''Проверяем, что пост добавляется на нужные страницы'''
         test_post = Post.objects.create(
             text='Recently Added Post',
-            author=PostsPagesTests.user,
-            group=PostsPagesTests.group
+            author=self.user,
+            group=self.group
         )
 
         pages = (
@@ -247,10 +247,57 @@ class PostsPagesTests(TestCase):
             response.context['page_obj'][0], test_post)
 
     def test_following(self):
-        #PostsPagesTests.authorized_client.get(
-        #    'posts:profile_follow', args=(PostsPagesTests.user.username,),
-        #)
-        pass 
+        '''Проверяем возможность подписаться и отписаться'''
+        self.authorized_client.get(
+            reverse('posts:profile_follow', args=(self.second_user.username,))
+        )
+        # Проверяем, что подписались
+        self.assertTrue(
+            Follow.objects.filter(
+                user=self.user,
+                author=self.second_user
+            ).exists()
+        )
+        
+        self.authorized_client.get(
+            reverse('posts:profile_unfollow', args=(self.second_user.username,))
+        )
+        # Проверяем, что отписались
+        self.assertFalse(
+            Follow.objects.filter(
+                user=self.user,
+                author=self.second_user
+            ).exists()
+        )
+    
+    def test_following_page_new_post_from_follower(self):
+        '''Появляется ли новый пост избранного автора в нашей ленте'''
+        third_user = User.objects.create_user('third')
+        third_client = Client()
+        third_client.force_login(third_user)
+        self.authorized_client.get(
+            reverse('posts:profile_follow', args=(self.second_user.username,))
+        )
+        # Проверяем, что пост есть в ленте юзера user
+        new_post = Post.objects.create(
+            text='Самый свеженький пост',
+            author=self.second_user,
+            group=self.group)
+        response = self.authorized_client.get(
+            reverse('posts:follow_index')
+        )
+        self.assertEqual(
+            response.context['page_obj'][0], new_post
+        )
+
+        # Проверяем, что поста нету у пользователя third
+        response = third_client.get(
+            reverse('posts:follow_index')
+        )
+        self.assertEqual(
+            len(response.context['page_obj']), 0
+        )
+
 
 class CacheTests(TestCase):
     @classmethod
