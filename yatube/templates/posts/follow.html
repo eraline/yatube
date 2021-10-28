@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load thumbnail %}
-{% block title%}
-  Последние обновления на сайте
-{%endblock%}
+    {% block title%}
+        Избранные авторы
+    {%endblock%}
 {% block content %}
 {% load cache %}
-{% cache 20 index_page %}
+{% cache 10 follower_page %}
   <div class="container py-5">  
     {% include 'posts/includes/switcher.html' %}
-    <h1>Последние обновления на сайте</h1>     
+    <h1>Лента</h1>     
     {% for post in page_obj %}
       <article>
         <ul>

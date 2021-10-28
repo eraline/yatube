@@ -9,10 +9,10 @@ from django.urls import reverse
 from django import forms
 from django.core.cache import cache
 
-from posts.models import Post, Group, Comment
+from posts.models import Post, Group, Comment, User
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
-User = get_user_model()
+# User = get_user_model()
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
@@ -127,11 +127,13 @@ class PostsPagesTests(TestCase):
         # Проверяем, что это пост
         self.assertIsInstance(response.context['page_obj'][0], Post)
         # Проверяем переданный user_profile
-        self.assertIsInstance(response.context['user_profile'], User)
+        self.assertIsInstance(response.context['author'], User)
         # Проверяем, что картинка передается в посте
         self.assertTrue(response.context['page_obj'][0].image)
         # Проверяем, что отдаёт только два поста юзера auth
         self.assertEqual(len(response.context['page_obj']), 2)
+        
+        self.assertIsInstance(response.context['following'], bool)
 
     def test_post_detail_shows_correct_context(self):
         '''Проверяем, что передается верный контекст на страницу поста'''
@@ -244,6 +246,11 @@ class PostsPagesTests(TestCase):
         self.assertNotEqual(
             response.context['page_obj'][0], test_post)
 
+    def test_following(self):
+        #PostsPagesTests.authorized_client.get(
+        #    'posts:profile_follow', args=(PostsPagesTests.user.username,),
+        #)
+        pass 
 
 class CacheTests(TestCase):
     @classmethod

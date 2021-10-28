@@ -40,7 +40,7 @@ class PostsURLTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_profile_url_exists_at_desired_location(self):
-        response = self.guest_client.get(
+        response = self.authorized_client.get(
             reverse('posts:profile', args=['auth'])
         )
         self.assertEqual(response.status_code, 200)
