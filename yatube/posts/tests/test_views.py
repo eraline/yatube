@@ -2,7 +2,6 @@ import shutil
 import tempfile
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -12,7 +11,6 @@ from django.core.cache import cache
 from posts.models import Post, Group, Comment, User, Follow
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
-# User = get_user_model()
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
@@ -132,7 +130,7 @@ class PostsPagesTests(TestCase):
         self.assertTrue(response.context['page_obj'][0].image)
         # Проверяем, что отдаёт только два поста юзера auth
         self.assertEqual(len(response.context['page_obj']), 2)
-        
+        # Проверяем, что получается булеву переменную
         self.assertIsInstance(response.context['following'], bool)
 
     def test_post_detail_shows_correct_context(self):
@@ -258,9 +256,10 @@ class PostsPagesTests(TestCase):
                 author=self.second_user
             ).exists()
         )
-        
+
         self.authorized_client.get(
-            reverse('posts:profile_unfollow', args=(self.second_user.username,))
+            reverse('posts:profile_unfollow',
+                    args=(self.second_user.username,))
         )
         # Проверяем, что отписались
         self.assertFalse(
@@ -269,7 +268,7 @@ class PostsPagesTests(TestCase):
                 author=self.second_user
             ).exists()
         )
-    
+
     def test_following_page_new_post_from_follower(self):
         '''Появляется ли новый пост избранного автора в нашей ленте'''
         third_user = User.objects.create_user('third')

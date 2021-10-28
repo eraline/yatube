@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-from django.shortcuts import get_list_or_404, get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
@@ -46,7 +46,8 @@ def profile(request, username):
     ).filter(author=author)
     paginator = Paginator(post_list, settings.PAGES_NUMBER)
     if request.user.is_authenticated:
-        following = Follow.objects.filter(user=request.user, author=author).exists()
+        following = Follow.objects.filter(
+            user=request.user, author=author).exists()
     else:
         following = False
     page_number = request.GET.get('page')
@@ -135,11 +136,13 @@ def follow_index(request):
     }
     return render(request, 'posts/follow.html', context)
 
+
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
     Follow.objects.create(user=request.user, author=author)
     return redirect('posts:profile', username=username)
+
 
 @login_required
 def profile_unfollow(request, username):
