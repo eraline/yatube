@@ -245,7 +245,7 @@ class PostsPagesTests(TestCase):
             response.context['page_obj'][0], test_post)
 
     def test_following(self):
-        '''Проверяем возможность подписаться и отписаться'''
+        '''Проверяем возможность подписаться'''
         self.authorized_client.get(
             reverse('posts:profile_follow', args=(self.second_user.username,))
         )
@@ -257,6 +257,8 @@ class PostsPagesTests(TestCase):
             ).exists()
         )
 
+    def test_unfollowing(self):
+        '''Проверяем возможность отписаться'''
         self.authorized_client.get(
             reverse('posts:profile_unfollow',
                     args=(self.second_user.username,))

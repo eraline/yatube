@@ -4,11 +4,11 @@
         Избранные авторы
     {%endblock%}
 {% block content %}
-{% load cache %}
-{% cache 10 follower_page %}
   <div class="container py-5">  
     {% include 'posts/includes/switcher.html' %}
     <h1>Лента</h1>     
+    {% load cache %}
+    {% cache 10 follower_page %}
     {% for post in page_obj %}
       <article>
         <ul>
@@ -31,7 +31,7 @@
       {% endif%}
   {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}
-{% endcache %} 
+  {% endcache %} 
   {% include 'posts/includes/paginator.html' %}
   </div>
 {% endblock %} 
