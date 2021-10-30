@@ -4,8 +4,6 @@
   Последние обновления на сайте
 {%endblock%}
 {% block content %}
-{% load cache %}
-{% cache 20 index_page %}
   <div class="container py-5">  
     {% include 'posts/includes/switcher.html' %}
     <h1>Последние обновления на сайте</h1>     
@@ -31,7 +29,6 @@
       {% endif%}
   {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}
-{% endcache %} 
   {% include 'posts/includes/paginator.html' %}
   </div>
 {% endblock %} 

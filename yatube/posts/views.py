@@ -2,19 +2,19 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-
+from django.core.cache import cache
 
 from .forms import PostForm, CommentForm
 from .models import Comment, Follow, Group, Post, User
 
 
 def index(request):
-    post_list = Post.objects.all()
-    paginator = Paginator(post_list, settings.PAGES_NUMBER)
 
+    post_list = cache.get_or_set('index_page', Post.objects.all(), 20)
+    # post_list = Post.objects.all()
+    paginator = Paginator(post_list, settings.PAGES_NUMBER)
     # Из URL извлекаем номер запрошенной страницы - это значение параметра page
     page_number = request.GET.get('page')
-
     # Получаем набор записей для страницы с запрошенным номером
     page_obj = paginator.get_page(page_number)
     # Отдаем в словаре контекста
@@ -124,6 +124,13 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
+    # Тесты я.практикума не проходят :( )
+    # post_list = cache.get_or_set(
+    #     'following_page',
+    #     Post.objects.filter(author__following__user=request.user),
+    #     20
+    # )
+
     post_list = Post.objects.filter(author__following__user=request.user)
     paginator = Paginator(post_list, settings.PAGES_NUMBER)
     page_number = request.GET.get('page')

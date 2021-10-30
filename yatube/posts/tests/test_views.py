@@ -77,6 +77,7 @@ class PostsPagesTests(TestCase):
 
     def setUp(self):
         self.guest_client = Client()
+        cache.clear()
 
     def test_pages_uses_correct_template(self):
         '''URL-адрес использует соответствующий шаблон.'''
