@@ -29,6 +29,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'testserver',
+    'www.eraline.pythonanywhere.com',
+    'eraline.pythonanywhere.com',
 ]
 
 INTERNAL_IPS = [
