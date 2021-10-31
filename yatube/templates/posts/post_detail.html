@@ -43,7 +43,12 @@
       </p>
       {%if user == post.author%}
         <a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk%}">
-          редактировать запись
+          Редактировать запись
+        </a>
+      {%endif%}
+      {%if user == post.author%}
+        <a class="btn btn-danger" href="{% url 'posts:post_delete' post.pk%}">
+          Удалить запись
         </a>
       {%endif%}
     </article>
