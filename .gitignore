@@ -150,3 +150,5 @@ dmypy.json
 # yatube/posts/static/
 yatube/media/posts/
 yatube/media/cache/
+yatube/static/admin/
+yatube/static/debug_toolbar/
