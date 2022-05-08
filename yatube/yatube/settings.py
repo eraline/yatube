@@ -9,9 +9,12 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 import os
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -97,13 +100,6 @@ WSGI_APPLICATION = 'yatube.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
@@ -177,3 +173,8 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+
+sentry_sdk.init(
+    dsn="https://e93148992dfb4b93806e8b9586a62b5f@o1234005.ingest.sentry.io/6383119",
+    integrations=[DjangoIntegration()],
+)
